@@ -99,7 +99,10 @@ def detectShape(cnt):
 
 C = 0
 # loop over the contours
-for c in cnts:
+# create new list where area is > 10
+cnts2 = [c for c in cnts if cv2.contourArea(c) > 10]
+
+for c in cnts2:
     # compute the moment of contour
     M = cv2.moments(c)
     # From moment we can calculte area, centroid etc

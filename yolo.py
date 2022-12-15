@@ -13,11 +13,12 @@ DISTANCE_CAMERA_WALL = 380 # mm
 # args = ap.parse_args()
 
 # load the image on disk and then display it
-image = cv2.imread('png_image.png') # 'png_image.png' # args.image raw_image.npy
+image = cv2.imread('png_image.png') # 'png_image.png' # args.image raw_image.npy TEST5.PNG
+#image = cv2.imread('TEST5.PNG')
 
-cv2.imshow("Original", image)
-plt.imshow(image)
-plt.show()
+#cv2.imshow("Original", image)
+# plt.imshow(image)
+# plt.show()
 
 
 # convert the color image into grayscale
@@ -134,5 +135,6 @@ for c in cnts2:
     cv2.imshow("Image", image)
 
 print()
+print(f"Total number of object in  'png_image.png  is  =  {len(cnts2)}")
 cv2.waitKey(0)
 cv2.destroyAllWindows()

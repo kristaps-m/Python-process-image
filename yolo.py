@@ -3,8 +3,26 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import argparse
+#import angles
 
 DISTANCE_CAMERA_WALL = 380 # mm
+def the_d(pts1,pts2):
+    # #print(miniList)
+    # pts1 = miniList[0]
+    # pts2 = miniList[1]
+    return ((pts2[0] - pts1[0]) ** 2 + (pts2[1] - pts1[1]) ** 2) ** 0.5
+def distance_calculator(triangleList):
+    #print(triangleList)
+    P1 = triangleList[0][0]
+    P2 = triangleList[1][0]
+    P3 = triangleList[2][0]
+    D1 = the_d(P1,P2)
+    D2 = the_d(P2,P3)
+    D3 = the_d(P3,P1)
+
+    return [D1,D2,D3]
+
+
 
 # Using Argument Parser to get the location of image
 #img = cv2.imread('png_image.png')
@@ -13,8 +31,9 @@ DISTANCE_CAMERA_WALL = 380 # mm
 # args = ap.parse_args()
 
 # load the image on disk and then display it
-image = cv2.imread('png_image.png') # 'png_image.png' # args.image raw_image.npy TEST5.PNG
+#image = cv2.imread('png_image.png') # 'png_image.png' # args.image raw_image.npy TEST5.PNG
 #image = cv2.imread('TEST5.PNG')
+image = cv2.imread('TEST2.png')
 
 #cv2.imshow("Original", image)
 # plt.imshow(image)
@@ -88,6 +107,9 @@ def detectShape(cnt):
         shape = "circle"
     print("-----------------START-----------------")
     print(vertices, "vertaces", shape, "the shape", len(vertices), "Len-vertesies")
+    if(shape == "triangle"):
+        print(vertices[0][0], vertices[0][0][0], vertices[0][0][1])
+        print(distance_calculator(vertices))
     print("-----------------END-----------------")
 
     # return the name of the shape
@@ -126,13 +148,18 @@ for c in cnts2:
 
     # Outline the contours
     cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
+    # I add these two below
+    #thr = cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
+    #out = angles.extract_and_measure_edges(thr)
 
-    # Write the name of shape on the center of shapes
+    # Write the name of shape in the center of shapes
     cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, (255, 255, 255), 2)
 
     # show the output image
+    #plt.imshow(out)
     cv2.imshow("Image", image)
+
 
 print()
 print(f"Total number of object in  'png_image.png  is  =  {len(cnts2)}")

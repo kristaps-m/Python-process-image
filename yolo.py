@@ -35,7 +35,7 @@ edged = cv2.Canny(grayScale, low, high)
 
 # After finding edges we have to find contours
 # Contour is a curve of points with no gaps in the curve
-# It will help us to find location of shapes
+# It will help us find location of shapes
 
 # cv2.RETR_EXTERNAL is passed to find the outermost contours (because we want to outline the shapes)
 # cv2.CHAIN_APPROX_SIMPLE is removing redundant points along a line

@@ -1,11 +1,21 @@
 from __future__ import print_function
 import numpy as np
 import cv2
+import math
 import matplotlib.pyplot as plt
 import argparse
 #import angles
 
 DISTANCE_CAMERA_WALL = 380 # mm
+
+# the angles of a triangle if one knows the three sides
+def get_one_angle(side1, side2, side3):
+    # math.acos((c**2 - b**2 - a**2)/(-2.0 * a * b))
+    test = (side2**2 + side3**2 - side1**2) / (2.0 * side2 * side3)
+    #test = (side3 ** 2 - side2 ** 2 - side1 ** 2) / (-2.0 * side1 * side2)
+    angle = math.acos(test)
+    return math.degrees(angle)
+
 def the_d(pts1,pts2):
     # #print(miniList)
     # pts1 = miniList[0]
@@ -32,8 +42,9 @@ def distance_calculator(triangleList):
 
 # load the image on disk and then display it
 #image = cv2.imread('png_image.png') # 'png_image.png' # args.image raw_image.npy TEST5.PNG
+image = cv2.imread('TEST3.PNG')
 #image = cv2.imread('TEST5.PNG')
-image = cv2.imread('TEST2.png')
+#image = cv2.imread('TEST2.png')
 
 #cv2.imshow("Original", image)
 # plt.imshow(image)
@@ -109,7 +120,13 @@ def detectShape(cnt):
     print(vertices, "vertaces", shape, "the shape", len(vertices), "Len-vertesies")
     if(shape == "triangle"):
         print(vertices[0][0], vertices[0][0][0], vertices[0][0][1])
-        print(distance_calculator(vertices))
+        D = distance_calculator(vertices)
+        print(D)
+        A, B, C = get_one_angle(D[0],D[1],D[2]), get_one_angle(D[1], D[2], D[0]), get_one_angle(D[2], D[0], D[1])
+        print(A)
+        print(B)
+        print(C)
+        print(A + B + C)
     print("-----------------END-----------------")
 
     # return the name of the shape

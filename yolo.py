@@ -41,8 +41,9 @@ def distance_calculator(triangleList):
 # args = ap.parse_args()
 
 # load the image on disk and then display it
-#image = cv2.imread('png_image.png') # 'png_image.png' # args.image raw_image.npy TEST5.PNG
-image = cv2.imread('TEST3.PNG')
+image = cv2.imread('png_image.png') # 'png_image.png' # args.image raw_image.npy TEST5.PNG
+#image = cv2.imread('TEST3.PNG')
+#image = cv2.imread('TEST3b.PNG')
 #image = cv2.imread('TEST5.PNG')
 #image = cv2.imread('TEST2.png')
 
@@ -130,17 +131,18 @@ def detectShape(cnt):
     print("-----------------END-----------------")
 
     # return the name of the shape
-    return shape
+    return [shape, vertices]
 
 
 # Now we will loop over every contour
 # call detectShape() for it and
 # write the name of shape in the center of image
 
-C = 0
+C = 2
 # loop over the contours
 # create new list where area is > 10
 cnts2 = [c for c in cnts if cv2.contourArea(c) > 10]
+
 
 for c in cnts2:
     # compute the moment of contour
@@ -154,7 +156,7 @@ for c in cnts2:
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
         # call detectShape for contour c
-        shape = detectShape(c)
+        shape = detectShape(c)[0]
     else:
         # set values as what you need in the situation
         shape = "Unknown"
@@ -171,14 +173,32 @@ for c in cnts2:
 
     # Write the name of shape in the center of shapes
     cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,
-                0.5, (255, 255, 255), 2)
+                0.5, (175, 62, 223), 2)
+    #print(C)
+    if(shape == "triangle"):
+        # print("START")
+        # print(c)
+        # print("END")
+        print("PUT TEXT")
+        the_verts = detectShape(c)[1]
+        D = distance_calculator(the_verts)
+        angleA = round(get_one_angle(D[0],D[1],D[2]), 2)
+        angleB = round(get_one_angle(D[1], D[2], D[0]), 2)
+        angleC = round(get_one_angle(D[2], D[0], D[1]), 2)
+        listOfAngles = [angleB, angleC, angleA]
+        for i in reversed(range(3)):
+            cv2.putText(image, f"{listOfAngles[i]}", (the_verts[i][0][0], the_verts[i][0][1]), cv2.FONT_HERSHEY_SIMPLEX,
+                    0.8, (0, 0, 255), 2)
 
     # show the output image
     #plt.imshow(out)
+    cv2.putText(image, f"TOTAL objects = {len(cnts2)}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
+                1, (255, 0, 0), 3)
     cv2.imshow("Image", image)
 
 
 print()
 print(f"Total number of object in  'png_image.png  is  =  {len(cnts2)}")
+
 cv2.waitKey(0)
 cv2.destroyAllWindows()

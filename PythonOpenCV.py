@@ -2,55 +2,40 @@ from __future__ import print_function
 import numpy as np
 import cv2
 import math
-import matplotlib.pyplot as plt
-import argparse
-#import angles
+"""For picture resizing"""
+# import tkinter as tk
+# root = tk.Tk()
+# screen_width = root.winfo_screenwidth()
+# screen_height = root.winfo_screenheight()
 
-DISTANCE_CAMERA_WALL = 380 # mm
+def get_one_angle_using_all_three_sides(side1, side2, side3):
+    angle = math.acos((side2**2 + side3**2 - side1**2) / (2.0 * side2 * side3))
 
-# the angles of a triangle if one knows the three sides
-def get_one_angle(side1, side2, side3):
-    # math.acos((c**2 - b**2 - a**2)/(-2.0 * a * b))
-    test = (side2**2 + side3**2 - side1**2) / (2.0 * side2 * side3)
-    #test = (side3 ** 2 - side2 ** 2 - side1 ** 2) / (-2.0 * side1 * side2)
-    angle = math.acos(test)
     return math.degrees(angle)
 
-def the_d(pts1,pts2):
-    # #print(miniList)
-    # pts1 = miniList[0]
-    # pts2 = miniList[1]
-    return ((pts2[0] - pts1[0]) ** 2 + (pts2[1] - pts1[1]) ** 2) ** 0.5
-def distance_calculator(triangleList):
-    #print(triangleList)
-    P1 = triangleList[0][0]
-    P2 = triangleList[1][0]
-    P3 = triangleList[2][0]
-    D1 = the_d(P1,P2)
-    D2 = the_d(P2,P3)
-    D3 = the_d(P3,P1)
+def calc_distance_between_two_points(point_one, point_two):
 
-    return [D1,D2,D3]
+    return ((point_two[0] - point_one[0]) ** 2 + (point_two[1] - point_one[1]) ** 2) ** 0.5
 
+def distance_calculator(triangleVerticesList):
+    # each point is a list with x and y coordinates e.g. [174, 233]
+    point1 = triangleVerticesList[0][0]
+    point2 = triangleVerticesList[1][0]
+    point3 = triangleVerticesList[2][0]
+    length1 = calc_distance_between_two_points(point1, point2)
+    length2 = calc_distance_between_two_points(point2, point3)
+    length3 = calc_distance_between_two_points(point3, point1)
 
+    return [length1, length2, length3]
 
-# Using Argument Parser to get the location of image
-#img = cv2.imread('png_image.png')
-# ap = argparse.ArgumentParser()
-# ap.add_argument('-i', '--png_image.png', required=True, help='Path to image') # 'png_image.png' # '--image'
-# args = ap.parse_args()
+# load the image on disk.
+image = cv2.imread('pictures_before_script/png_image.png')
+#image = cv2.imread('pictures_before_script/test1.png')
+#image = cv2.imread('pictures_before_script/test2.png')
+#image = cv2.imread('pictures_before_script/test3.png')
+#image = cv2.imread('pictures_before_script/test4.png')
 
-# load the image on disk and then display it
-image = cv2.imread('png_image.png') # 'png_image.png' # args.image raw_image.npy TEST5.PNG
-#image = cv2.imread('TEST3.PNG')
-#image = cv2.imread('TEST3b.PNG')
-#image = cv2.imread('TEST5.PNG')
-#image = cv2.imread('TEST2.png')
-
-#cv2.imshow("Original", image)
-# plt.imshow(image)
-# plt.show()
-
+cv2.imshow("Original", image)
 
 # convert the color image into grayscale
 grayScale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -70,12 +55,11 @@ edged = cv2.Canny(grayScale, low, high)
 
 # cv2.RETR_EXTERNAL is passed to find the outermost contours (because we want to outline the shapes)
 # cv2.CHAIN_APPROX_SIMPLE is removing redundant points along a line
-#(_, cnts, _) = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 (cnts, _) = cv2.findContours(edged, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 '''
 We are going to use contour approximation method to find vertices of
-geometric shapes. The alogrithm  is also known as Ramer Douglas Peucker alogrithm.
+geometric shapes. The algorithm  is also known as Ramer Douglas Peucker alogrithm.
 In OpenCV it is implemented in cv2.approxPolyDP method.abs
 
 detectShape() function below takes a contour as parameter and
@@ -90,7 +74,7 @@ def detectShape(cnt):
     # apply contour approximation and store the result in vertices
     vertices = cv2.approxPolyDP(c, 0.04 * peri, True)
 
-    # If the shape it triangle, it will have 3 vertices
+    # If the shape is triangle, it will have 3 vertices
     if len(vertices) == 3:
         shape = 'triangle'
 
@@ -117,28 +101,14 @@ def detectShape(cnt):
     # otherwise, we assume the shape is a circle
     else:
         shape = "circle"
-    print("-----------------START-----------------")
-    print(vertices, "vertaces", shape, "the shape", len(vertices), "Len-vertesies")
-    if(shape == "triangle"):
-        print(vertices[0][0], vertices[0][0][0], vertices[0][0][1])
-        D = distance_calculator(vertices)
-        print(D)
-        A, B, C = get_one_angle(D[0],D[1],D[2]), get_one_angle(D[1], D[2], D[0]), get_one_angle(D[2], D[0], D[1])
-        print(A)
-        print(B)
-        print(C)
-        print(A + B + C)
-    print("-----------------END-----------------")
 
-    # return the name of the shape
+    # return the name of the shape and vertices
     return [shape, vertices]
-
 
 # Now we will loop over every contour
 # call detectShape() for it and
 # write the name of shape in the center of image
 
-C = 2
 # loop over the contours
 # create new list where area is > 10
 cnts2 = [c for c in cnts if cv2.contourArea(c) > 10]
@@ -147,11 +117,9 @@ cnts2 = [c for c in cnts if cv2.contourArea(c) > 10]
 for c in cnts2:
     # compute the moment of contour
     M = cv2.moments(c)
-    # From moment we can calculte area, centroid etc
+    # From moment, we can calculate area, centroid etc.
     # The center or centroid can be calculated as follows
 
-    # cX = int(M['m10'] / M['m00'])
-    # cY = int(M['m01'] / M['m00'])
     if M["m00"] != 0:
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
@@ -162,43 +130,31 @@ for c in cnts2:
         shape = "Unknown"
         cX, cY = 0, 0
 
-    # # call detectShape for contour c
-    # shape = detectShape(c)
-
     # Outline the contours
     cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
-    # I add these two below
-    #thr = cv2.drawContours(image, [c], -1, (0, 255, 0), 2)
-    #out = angles.extract_and_measure_edges(thr)
 
     # Write the name of shape in the center of shapes
     cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, (175, 62, 223), 2)
-    #print(C)
+
     if(shape == "triangle"):
-        # print("START")
-        # print(c)
-        # print("END")
-        print("PUT TEXT")
-        the_verts = detectShape(c)[1]
-        D = distance_calculator(the_verts)
-        angleA = round(get_one_angle(D[0],D[1],D[2]), 2)
-        angleB = round(get_one_angle(D[1], D[2], D[0]), 2)
-        angleC = round(get_one_angle(D[2], D[0], D[1]), 2)
+        the_vertices = detectShape(c)[1]
+        D = distance_calculator(the_vertices)
+        angleA = round(get_one_angle_using_all_three_sides(D[0], D[1], D[2]), 2)
+        angleB = round(get_one_angle_using_all_three_sides(D[1], D[2], D[0]), 2)
+        angleC = round(get_one_angle_using_all_three_sides(D[2], D[0], D[1]), 2)
         listOfAngles = [angleB, angleC, angleA]
         for i in reversed(range(3)):
-            cv2.putText(image, f"{listOfAngles[i]}", (the_verts[i][0][0], the_verts[i][0][1]), cv2.FONT_HERSHEY_SIMPLEX,
-                    0.8, (0, 0, 255), 2)
+            cv2.putText(image, f"{listOfAngles[i]}", (the_vertices[i][0][0], the_vertices[i][0][1]),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
 
-    # show the output image
-    #plt.imshow(out)
-    cv2.putText(image, f"TOTAL objects = {len(cnts2)}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
+    cv2.putText(image, f"Total objects: {len(cnts2)}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
                 1, (255, 0, 0), 3)
+    #imS = cv2.resize(image, (screen_width, screen_height))
     cv2.imshow("Image", image)
 
-
 print()
-print(f"Total number of object in  'png_image.png  is  =  {len(cnts2)}")
+print(f"Total number of object in 'png_image.png' is: {len(cnts2)}")
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()

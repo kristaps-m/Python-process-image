@@ -2,6 +2,8 @@ from __future__ import print_function
 import numpy as np
 import cv2
 import math
+from statistics import mean
+from matplotlib import pyplot as plt
 """For picture resizing"""
 # import tkinter as tk
 # root = tk.Tk()
@@ -17,6 +19,11 @@ def calc_distance_between_two_points(point_one, point_two):
 
     return ((point_two[0] - point_one[0]) ** 2 + (point_two[1] - point_one[1]) ** 2) ** 0.5
 
+def mid_point_calculator(point_one, point_two):
+    #  (x₁ + x₂)/2, (y₁ + y₂)/2
+
+    return [round((point_one[0] + point_two[0])/2), round((point_one[1] + point_two[1])/2)]
+
 def distance_calculator(triangleVerticesList):
     # each point is a list with x and y coordinates e.g. [174, 233]
     point1 = triangleVerticesList[0][0]
@@ -25,17 +32,24 @@ def distance_calculator(triangleVerticesList):
     length1 = calc_distance_between_two_points(point1, point2)
     length2 = calc_distance_between_two_points(point2, point3)
     length3 = calc_distance_between_two_points(point3, point1)
+    print(length1, length2, length3)
 
     return [length1, length2, length3]
 
 # load the image on disk.
-image = cv2.imread('pictures_before_script/png_image.png')
+#image = cv2.imread('pictures_before_script/png_image.png')
 #image = cv2.imread('pictures_before_script/test1.png')
 #image = cv2.imread('pictures_before_script/test2.png')
 #image = cv2.imread('pictures_before_script/test3.png')
 #image = cv2.imread('pictures_before_script/test4.png')
+image = cv2.imread('pictures_before_script/test5.png')
 
-cv2.imshow("Original", image)
+"""Show coordinates"""
+# plt.imshow(image)
+# plt.show()
+
+#cv2.imshow("Original", image)
+
 
 # convert the color image into grayscale
 grayScale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -136,6 +150,44 @@ for c in cnts2:
     # Write the name of shape in the center of shapes
     cv2.putText(image, shape, (cX, cY), cv2.FONT_HERSHEY_SIMPLEX,
                 0.5, (175, 62, 223), 2)
+
+    if (shape == "square" or shape == "rectangle"):
+        verts = detectShape(c)[1]
+        # List np list with first item @ end
+        newList = np.concatenate((verts, [verts[0]]), axis=0)
+        print(newList)
+        for index in range(len(newList) - 1):
+            # mid points coordinates
+            midPoints = mid_point_calculator(newList[index][0], newList[index + 1][0])
+            print(midPoints, "the test yes")
+            midX, midY = midPoints[0], midPoints[1]
+            print(newList[index], "4 shaper")
+            D = round(calc_distance_between_two_points(newList[index][0], newList[index+1][0]), 1)
+            print(D)
+            cv2.putText(image, f"* {D} px", (midX, midY),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (75, 75, 75), 2)
+
+    if (shape == "circle"):
+        verts = detectShape(c)[1]
+        radiuses = [calc_distance_between_two_points([cX,cY], XandY[0]) for XandY in verts]
+        radiusOfCircle = round(mean(radiuses), 1)
+
+        #print(radiuses, "List of radiuses", radiusOfCircle, "<-- theRadius")
+
+        print(f"cX = {cX}, cY = {cY}, {verts}")
+        # Add center point
+        cv2.putText(image, f"+", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 2)
+
+        for XY in verts:
+            # Draw each vertices in circle
+            cv2.putText(image, f". r: {radiusOfCircle} px", (XY[0][0], XY[0][1]),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 100, 100), 2)
+            if(XY[0][0] < radiusOfCircle + XY[0][0]):
+                # cv2.arrowedLine(img, start, end, color, thickness, line_type, shift, tip_length)
+                cv2.arrowedLine(image, (cX, cY), (XY[0][0], XY[0][1]), (0, 0, 255), 2, 5, 0, 0.2)
+                #cv2.imshow("ArrowedLines", image)
+                break
+
 
     if(shape == "triangle"):
         the_vertices = detectShape(c)[1]

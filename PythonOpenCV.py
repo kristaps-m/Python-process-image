@@ -4,25 +4,42 @@ import cv2
 import math
 from statistics import mean
 from matplotlib import pyplot as plt
+
 """For picture resizing"""
 # import tkinter as tk
 # root = tk.Tk()
 # screen_width = root.winfo_screenwidth()
 # screen_height = root.winfo_screenheight()
 
+"""
+sensor = 'OmniVision OV2740'
+sizeInMM = '5.5 x 5.5 x 3 mm' # https://www.ovt.com/products/ov02740-h34a-z/
+
+"""
+
+DISTANCE_BETWEEN_CAMERA_AND_WALL = 380  # mm
+OBJECT_HEIGHT_ON_SENSOR = lambda r: (r / 1080) * 5.5  # mm
+REAL_OBJECT_HEIGHT = lambda x: (DISTANCE_BETWEEN_CAMERA_AND_WALL * OBJECT_HEIGHT_ON_SENSOR) / 1.88
+
+
+# print(OBJECT_HEIGHT_ON_SENSOR(10))
+
+
 def get_one_angle_using_all_three_sides(side1, side2, side3):
-    angle = math.acos((side2**2 + side3**2 - side1**2) / (2.0 * side2 * side3))
+    angle = math.acos((side2 ** 2 + side3 ** 2 - side1 ** 2) / (2.0 * side2 * side3))
 
     return math.degrees(angle)
 
-def calc_distance_between_two_points(point_one, point_two):
 
+def calc_distance_between_two_points(point_one, point_two):
     return ((point_two[0] - point_one[0]) ** 2 + (point_two[1] - point_one[1]) ** 2) ** 0.5
+
 
 def mid_point_calculator(point_one, point_two):
     #  (x₁ + x₂)/2, (y₁ + y₂)/2
 
-    return [round((point_one[0] + point_two[0])/2), round((point_one[1] + point_two[1])/2)]
+    return [round((point_one[0] + point_two[0]) / 2), round((point_one[1] + point_two[1]) / 2)]
+
 
 def distance_calculator(triangleVerticesList):
     # each point is a list with x and y coordinates e.g. [174, 233]
@@ -32,23 +49,24 @@ def distance_calculator(triangleVerticesList):
     length1 = calc_distance_between_two_points(point1, point2)
     length2 = calc_distance_between_two_points(point2, point3)
     length3 = calc_distance_between_two_points(point3, point1)
-    print(length1, length2, length3)
+    # print(length1, length2, length3)
 
     return [length1, length2, length3]
 
+
 # load the image on disk.
-#image = cv2.imread('pictures_before_script/png_image.png')
-#image = cv2.imread('pictures_before_script/test1.png')
-#image = cv2.imread('pictures_before_script/test2.png')
-#image = cv2.imread('pictures_before_script/test3.png')
-#image = cv2.imread('pictures_before_script/test4.png')
-image = cv2.imread('pictures_before_script/test5.png')
+image = cv2.imread('pictures_before_script/png_image.png')
+# image = cv2.imread('pictures_before_script/test1.png')
+# image = cv2.imread('pictures_before_script/test2.png')
+# image = cv2.imread('pictures_before_script/test3.png')
+# image = cv2.imread('pictures_before_script/test4.png')
+# image = cv2.imread('pictures_before_script/test5.png')
 
 """Show coordinates"""
 # plt.imshow(image)
 # plt.show()
 
-#cv2.imshow("Original", image)
+# cv2.imshow("Original", image)
 
 
 # convert the color image into grayscale
@@ -119,6 +137,7 @@ def detectShape(cnt):
     # return the name of the shape and vertices
     return [shape, vertices]
 
+
 # Now we will loop over every contour
 # call detectShape() for it and
 # write the name of shape in the center of image
@@ -126,7 +145,6 @@ def detectShape(cnt):
 # loop over the contours
 # create new list where area is > 10
 cnts2 = [c for c in cnts if cv2.contourArea(c) > 10]
-
 
 for c in cnts2:
     # compute the moment of contour
@@ -155,26 +173,26 @@ for c in cnts2:
         verts = detectShape(c)[1]
         # List np list with first item @ end
         newList = np.concatenate((verts, [verts[0]]), axis=0)
-        print(newList)
+        # print(newList)
         for index in range(len(newList) - 1):
             # mid points coordinates
             midPoints = mid_point_calculator(newList[index][0], newList[index + 1][0])
-            print(midPoints, "the test yes")
+            # print(midPoints, "the test yes")
             midX, midY = midPoints[0], midPoints[1]
-            print(newList[index], "4 shaper")
-            D = round(calc_distance_between_two_points(newList[index][0], newList[index+1][0]), 1)
-            print(D)
+            # print(newList[index], "4 shaper")
+            D = round(calc_distance_between_two_points(newList[index][0], newList[index + 1][0]), 1)
+            print(f"length of side {index} = {D}")
             cv2.putText(image, f"* {D} px", (midX, midY),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (75, 75, 75), 2)
 
     if (shape == "circle"):
         verts = detectShape(c)[1]
-        radiuses = [calc_distance_between_two_points([cX,cY], XandY[0]) for XandY in verts]
+        radiuses = [calc_distance_between_two_points([cX, cY], XandY[0]) for XandY in verts]
         radiusOfCircle = round(mean(radiuses), 1)
+        print(f"The radius of circle is: {radiusOfCircle}")
+        # print(radiuses, "List of radiuses", radiusOfCircle, "<-- theRadius")
 
-        #print(radiuses, "List of radiuses", radiusOfCircle, "<-- theRadius")
-
-        print(f"cX = {cX}, cY = {cY}, {verts}")
+        # print(f"cX = {cX}, cY = {cY}, {verts}")
         # Add center point
         cv2.putText(image, f"+", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 2)
 
@@ -182,14 +200,13 @@ for c in cnts2:
             # Draw each vertices in circle
             cv2.putText(image, f". r: {radiusOfCircle} px", (XY[0][0], XY[0][1]),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 100, 100), 2)
-            if(XY[0][0] < radiusOfCircle + XY[0][0]):
+            if (XY[0][0] < radiusOfCircle + XY[0][0]):
                 # cv2.arrowedLine(img, start, end, color, thickness, line_type, shift, tip_length)
                 cv2.arrowedLine(image, (cX, cY), (XY[0][0], XY[0][1]), (0, 0, 255), 2, 5, 0, 0.2)
-                #cv2.imshow("ArrowedLines", image)
+                # cv2.imshow("ArrowedLines", image)
                 break
 
-
-    if(shape == "triangle"):
+    if (shape == "triangle"):
         the_vertices = detectShape(c)[1]
         D = distance_calculator(the_vertices)
         angleA = round(get_one_angle_using_all_three_sides(D[0], D[1], D[2]), 2)
@@ -202,7 +219,7 @@ for c in cnts2:
 
     cv2.putText(image, f"Total objects: {len(cnts2)}", (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
                 1, (255, 0, 0), 3)
-    #imS = cv2.resize(image, (screen_width, screen_height))
+    # imS = cv2.resize(image, (screen_width, screen_height))
     cv2.imshow("Image", image)
 
 print()

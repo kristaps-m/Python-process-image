@@ -15,7 +15,7 @@ To run python script:
 
 ### Before and after Python script table.
 
-Table below shows 2 out 5 existing pictures in 'pictures_before_script' folder. Feel free to add more and run the script. All picture variables are in 'PythonOpenCV.py' file from line 32 to 36. Feel free to pick any one you want using '#' as comment.
+Table below shows 2 out 5 existing pictures in 'pictures_before_script' folder. Feel free to add more and run the script. All picture variables are in 'PythonOpenCV.py' file from line 57 to 62. Feel free to pick any one you want using '#' as comment.
 
 This script only calculates angles for **_triangles_**!
 
@@ -31,5 +31,9 @@ This script only calculates angles for **_triangles_**!
   <tr>
     <td><img src="pictures_before_script/test4.png" alt="test4.png" width="500"></td>    
     <td><img src="script_output/test4_output.png" alt="test4_output.png" width="500"></td>
+  </tr>
+  <tr>
+    <td><img src="pictures_before_script/test5.png" alt="test5.png" width="500"></td>    
+    <td><img src="script_output/test5_output.png" alt="test5_output.png" width="500"></td>
   </tr>
 </table>

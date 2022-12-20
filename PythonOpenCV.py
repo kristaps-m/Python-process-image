@@ -1,4 +1,3 @@
-from __future__ import print_function
 import numpy as np
 import cv2
 import math
@@ -14,15 +13,15 @@ from matplotlib import pyplot as plt
 """
 sensor = 'OmniVision OV2740'
 sizeInMM = '5.5 x 5.5 x 3 mm' # https://www.ovt.com/products/ov02740-h34a-z/
-
 """
 
 DISTANCE_BETWEEN_CAMERA_AND_WALL = 380  # mm
-OBJECT_HEIGHT_ON_SENSOR = lambda r: (r / 1080) * 5.5  # mm
-REAL_OBJECT_HEIGHT = lambda x: (DISTANCE_BETWEEN_CAMERA_AND_WALL * OBJECT_HEIGHT_ON_SENSOR) / 1.88
 
+def real_object_height(sizeInPixels):
+    object_height_on_sensor_mm = (sizeInPixels / 1080) * 5.5
+    real_object_height = (DISTANCE_BETWEEN_CAMERA_AND_WALL * object_height_on_sensor_mm) / 1.88
 
-# print(OBJECT_HEIGHT_ON_SENSOR(10))
+    return round(real_object_height / 10, 1)  # cm
 
 
 def get_one_angle_using_all_three_sides(side1, side2, side3):
@@ -55,17 +54,18 @@ def distance_calculator(triangleVerticesList):
 
 
 # load the image on disk.
-image = cv2.imread('pictures_before_script/png_image.png')
-# image = cv2.imread('pictures_before_script/test1.png')
-# image = cv2.imread('pictures_before_script/test2.png')
-# image = cv2.imread('pictures_before_script/test3.png')
-# image = cv2.imread('pictures_before_script/test4.png')
-# image = cv2.imread('pictures_before_script/test5.png')
+the_picture = 'pictures_before_script/png_image.png'
+# the_picture = 'pictures_before_script/test1.png'
+# the_picture = 'pictures_before_script/test2.png'
+# the_picture = 'pictures_before_script/test3.png'
+# the_picture = 'pictures_before_script/test4.png'
+# the_picture = 'pictures_before_script/test5.png'
+image = cv2.imread(the_picture)
 
 """Show coordinates"""
 # plt.imshow(image)
 # plt.show()
-
+"""Show original picture"""
 # cv2.imshow("Original", image)
 
 
@@ -173,32 +173,31 @@ for c in cnts2:
         verts = detectShape(c)[1]
         # List np list with first item @ end
         newList = np.concatenate((verts, [verts[0]]), axis=0)
-        # print(newList)
+
         for index in range(len(newList) - 1):
             # mid points coordinates
             midPoints = mid_point_calculator(newList[index][0], newList[index + 1][0])
-            # print(midPoints, "the test yes")
             midX, midY = midPoints[0], midPoints[1]
-            # print(newList[index], "4 shaper")
             D = round(calc_distance_between_two_points(newList[index][0], newList[index + 1][0]), 1)
             print(f"length of side {index} = {D}")
-            cv2.putText(image, f"* {D} px", (midX, midY),
+            text_on_img = f"* {D} px {real_object_height(D)} cm" if the_picture == 'pictures_before_script/png_image.png' else f"* {D} px"
+            cv2.putText(image, text_on_img, (midX, midY),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (75, 75, 75), 2)
 
     if (shape == "circle"):
         verts = detectShape(c)[1]
         radiuses = [calc_distance_between_two_points([cX, cY], XandY[0]) for XandY in verts]
         radiusOfCircle = round(mean(radiuses), 1)
-        print(f"The radius of circle is: {radiusOfCircle}")
-        # print(radiuses, "List of radiuses", radiusOfCircle, "<-- theRadius")
+        print(f"The radius of circle is: {radiusOfCircle} pixels")
+        print(f"Object height is {real_object_height(radiusOfCircle)}")
 
-        # print(f"cX = {cX}, cY = {cY}, {verts}")
         # Add center point
         cv2.putText(image, f"+", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 2)
 
         for XY in verts:
             # Draw each vertices in circle
-            cv2.putText(image, f". r: {radiusOfCircle} px", (XY[0][0], XY[0][1]),
+            text_on_img = f". r: {radiusOfCircle} px {real_object_height(radiusOfCircle)} cm" if the_picture == 'pictures_before_script/png_image.png' else f". r: {radiusOfCircle} px"
+            cv2.putText(image, text_on_img, (XY[0][0], XY[0][1]),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 100, 100), 2)
             if (XY[0][0] < radiusOfCircle + XY[0][0]):
                 # cv2.arrowedLine(img, start, end, color, thickness, line_type, shift, tip_length)

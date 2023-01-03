@@ -54,12 +54,12 @@ def distance_calculator(triangleVerticesList):
 
 
 # load the image on disk.
-the_picture = 'pictures_before_script/png_image.png'
+# the_picture = 'pictures_before_script/png_image.png'
 # the_picture = 'pictures_before_script/test1.png'
 # the_picture = 'pictures_before_script/test2.png'
 # the_picture = 'pictures_before_script/test3.png'
 # the_picture = 'pictures_before_script/test4.png'
-# the_picture = 'pictures_before_script/test5.png'
+the_picture = 'pictures_before_script/test5.png'
 image = cv2.imread(the_picture)
 
 """Show coordinates"""

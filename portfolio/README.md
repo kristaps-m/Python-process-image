@@ -1,3 +1,1 @@
-# Hello, this is for portfolio project I have been working on
-## Name of Project is Python-process-image
-## My name is Kristaps and I made this software
+I created Python script that uses 'Numpy' and 'OpenCV' libraries. It will process given image and output following data - amount of figures in scene, name of the figures shape, get measurements in px (length of rectangle side, circle radius, value of any triangle angle)

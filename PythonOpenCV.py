@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import math
 from statistics import mean
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 """For picture resizing"""
 # import tkinter as tk
@@ -54,7 +54,7 @@ def distance_calculator(triangleVerticesList):
 
 
 # load the image on disk.
-# the_picture = 'pictures_before_script/png_image.png'
+#the_picture = 'pictures_before_script/png_image.png'
 # the_picture = 'pictures_before_script/test1.png'
 # the_picture = 'pictures_before_script/test2.png'
 # the_picture = 'pictures_before_script/test3.png'
